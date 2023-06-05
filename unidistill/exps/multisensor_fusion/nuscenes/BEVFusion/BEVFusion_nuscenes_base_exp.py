@@ -277,6 +277,8 @@ class Exp(BaseExp):
         total_devices=1,
         max_epochs=20,
         ckpt_path=None,
+        data_cfg=DATA_CFG,
+        model_cfg=MODEL_CFG,
         **kwargs,
     ):
         super(Exp, self).__init__(
@@ -289,8 +291,8 @@ class Exp(BaseExp):
         self.dump_interval = 1
         self.lr_scale_factor = {"camera_encoder": 0.1}
         self.grad_clip_value = 0.1
-        self.data_cfg = DATA_CFG
-        self.model_cfg = MODEL_CFG
+        self.data_cfg = data_cfg
+        self.model_cfg = model_cfg
         self.data_split = {"train": "training", "val": "validation", "test": "testing"}
         self._get_exp_output_dir()
 
@@ -301,7 +303,7 @@ class Exp(BaseExp):
 
     def configure_train_dataloader(self):
         train_dataset = NuscenesMultiModalData(
-            **self.data_cfg,
+            **self.data_cfg['train'],
             data_split=self.data_split["train"],
         )
         train_loader = torch.utils.data.DataLoader(
@@ -318,7 +320,7 @@ class Exp(BaseExp):
 
     def configure_val_dataloader(self):
         val_dataset = NuscenesMultiModalData(
-            **self.data_cfg,
+            **self.data_cfg['val'],
             data_split=self.data_split["val"],
         )
         val_loader = torch.utils.data.DataLoader(
@@ -334,7 +336,7 @@ class Exp(BaseExp):
 
     def configure_test_dataloader(self):
         test_dataset = NuscenesMultiModalData(
-            **self.data_cfg,
+            **self.data_cfg['test'],
             data_split=self.data_split["test"],
         )
         test_loader = torch.utils.data.DataLoader(
@@ -354,8 +356,8 @@ class Exp(BaseExp):
         )
         return model
 
-    def forward(self, points, imgs, metas, gt_boxes):
-        return self.model(points, imgs, metas, gt_boxes)
+    def forward(self, points, imgs, metas, gt_boxes, **kwargs):
+        return self.model(points, imgs, metas, gt_boxes, **kwargs)
 
     def training_step(self, batch):
         if torch.cuda.is_available():

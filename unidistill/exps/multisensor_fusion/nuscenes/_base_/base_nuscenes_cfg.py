@@ -47,7 +47,7 @@ _AUG_CFG = dict(
         flip_dy_ratio=0.5,
     ),
     gt_sampling_cfg=dict(
-        root_path="/data/dataset",
+        root_path="./data/nuscenes",
         data_name="nuScenes_multimodal",  # optional: nuScenes
         data_split="training",
         use_road_plane=False,
@@ -84,7 +84,7 @@ _AUG_CFG = dict(
 )
 
 DATA_CFG = dict(
-    root_path="/data/dataset",
+    root_path="./data/nuscenes",
     lidar_key_list=["LIDAR_TOP"],
     img_key_list=[
         "CAM_BACK",

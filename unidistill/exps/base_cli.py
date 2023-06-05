@@ -38,10 +38,10 @@ def run_cli(
     parent_parser.add_argument("--ckpt_path", type=str)
     parser = BaseExp.add_argparse_args(parent_parser)
     parser.set_defaults(
-        check_val_every_n_epoch=20,
+        check_val_every_n_epoch=5,
         num_sanity_val_steps=0,
         gradient_clip_val=0.1,
-        accelerator="ddp",
+        strategy="ddp",
     )
     args = parser.parse_args()
     if args.seed is not None:

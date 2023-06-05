@@ -47,8 +47,9 @@ class NuscenesMultiModalData(NuscenesMultiModalDataset):
 
     def __init__(
         self,
+        anno_file,
         aug_cfg=None,
-        root_path="/data/dataset",
+        root_path="./data/nuscenes",
         lidar_key_list=["LIDAR_TOP"],
         img_key_list=[
             "CAM_BACK",
@@ -68,6 +69,7 @@ class NuscenesMultiModalData(NuscenesMultiModalDataset):
         **kwargs
     ):
         super().__init__(
+            anno_file,
             class_names=class_names,
             data_split=data_split,
             root_path=root_path,
@@ -101,7 +103,7 @@ class NuscenesMultiModalData(NuscenesMultiModalDataset):
 
         # TODO:
         if not self.is_train:
-            meta_file = "/data/dataset/nuscenes_v1.0-trainval_meta.pkl"
+            meta_file = "./data/nuscenes/nuscenes_v1.0-trainval_meta.pkl"
             self.meta_info = load_pkl(meta_file)
 
     def get_det_augmentor(self, aug_cfg):
@@ -398,7 +400,7 @@ class NuscenesMultiModalData(NuscenesMultiModalDataset):
         output_dir = os.path.join(str(kwargs["output_dir"]), "nuscenes_submission")
         for frame in self.infos:
             frame["token"] = frame["sample_token"]
-        with open("/data/dataset/nuscenes_test_meta.pkl", "rb") as f:
+        with open("./data/nuscenes/nuscenes_test_meta.pkl", "rb") as f:
             meta_info = pickle.load(f)
         dump_path = os.path.join(output_dir, "boxes.pkl")
         if not os.path.isdir(output_dir):
@@ -462,7 +464,8 @@ def collate_fn(data, is_return_depth=False, with_points=True):
                     )
             return batch_tensor.to(torch.float32)
 
-    data_keys = ["imgs", "points", "gt_boxes", "gt_labels"]
+    data_keys = ["imgs", "points", "gt_boxes", "gt_labels", "voxel_semantics",
+                 "mask_lidar", "mask_camera"]
     batch_collection = dict()
     for key in data_keys:
         if key in data[0]:

@@ -40,6 +40,7 @@ _map_name_from_general_to_detection = {
 class NuscenesMultiModalDataset(Dataset):
     def __init__(
         self,
+        anno_file,
         class_names=(
             "car",
             "truck",
@@ -111,7 +112,7 @@ class NuscenesMultiModalDataset(Dataset):
         else:
             self.cam_sweeps_idx = num_cam_sweeps
         assert self.with_lidar or self.with_camera, "Must have one Sensor!"
-        with open("/data/dataset/{}_info.pkl".format(self.data_split), "rb") as f:
+        with open(anno_file, "rb") as f:
             self.infos = pickle.load(f)
 
     @property
@@ -172,7 +173,7 @@ class NuscenesMultiModalDataset(Dataset):
         result = {}
         for k in keys:
             img_file = os.path.join(
-                "/data/dataset/", self.infos[idx]["cam_infos"][k]["filename"]
+                self.root_path, self.infos[idx]["cam_infos"][k]["filename"]
             )
             result[k] = skimage_io.imread(img_file)
         return result
@@ -191,7 +192,7 @@ class NuscenesMultiModalDataset(Dataset):
                     cam_sw_idx -= 1
                 if cam_sw_idx >= 0:
                     sw_img_file = os.path.join(
-                        "/data/dataset/",
+                        self.root_path,
                         item_info["cam_sweeps"][cam_sw_idx][cam]["filename"],
                     )
                     sw_imgs[cam] = skimage_io.imread(io.BytesIO(sw_img_file))
@@ -209,7 +210,7 @@ class NuscenesMultiModalDataset(Dataset):
         result = {}
         for k in keys:
             point_file = os.path.join(
-                "/data/dataset/", self.infos[idx]["lidar_infos"][k]["filename"]
+                self.root_path, self.infos[idx]["lidar_infos"][k]["filename"]
             )
             point_cloud = np.fromfile(point_file, dtype=np.float32, count=-1).reshape(
                 -1, 5
@@ -228,7 +229,7 @@ class NuscenesMultiModalDataset(Dataset):
                 lidar_sw_idx = min(sw_idx, len(item_info["lidar_sweeps"]) - 1)
                 if lidar_sw_idx >= 0:
                     sw_point_file = os.path.join(
-                        "/data/dataset/",
+                        "./data/nuscenes/",
                         item_info["lidar_sweeps"][lidar_sw_idx][lidar]["filename"],
                     )
                     point_cloud = np.fromfile(
