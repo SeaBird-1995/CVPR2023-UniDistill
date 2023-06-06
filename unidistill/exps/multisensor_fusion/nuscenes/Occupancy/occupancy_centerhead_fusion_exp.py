@@ -274,7 +274,7 @@ class Exp(BaseExp):
 
         val_loader = torch.utils.data.DataLoader(
             val_dataset,
-            batch_size=self.batch_size_per_device,
+            batch_size=1,
             shuffle=False,
             collate_fn=collate_fn,
             num_workers=32,
@@ -290,7 +290,7 @@ class Exp(BaseExp):
         )
         test_loader = torch.utils.data.DataLoader(
             test_dataset,
-            batch_size=self.batch_size_per_device,
+            batch_size=1,
             shuffle=False,
             collate_fn=collate_fn,
             num_workers=32,

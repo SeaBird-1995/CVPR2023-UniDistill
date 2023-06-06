@@ -51,9 +51,6 @@ class NuScenesDatasetOccpancy(NuscenesMultiModalData):
 
         return self.occ_eval_metrics.count_miou()
     
-    def __len__(self):
-        return 100
-    
     def __getitem__(self, idx):
         data_dict = super(NuScenesDatasetOccpancy, self).__getitem__(idx)
         data_dict['occ_gt_path'] = self.infos[idx]['occ_path']
