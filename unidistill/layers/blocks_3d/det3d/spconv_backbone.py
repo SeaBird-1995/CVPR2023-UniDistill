@@ -329,8 +329,8 @@ class VoxelResBackBone8x(nn.Module):
             spconv.SparseConv3d(
                 128,
                 128,
-                (3, 1, 1),
-                stride=(2, 1, 1),
+                (1, 1, 1),
+                stride=(1, 1, 1),
                 padding=last_pad,
                 bias=False,
                 indice_key="spconv_down2",

@@ -25,6 +25,11 @@ class BaseMultiSensorFusion(nn.Module):
     def with_camera_encoder(self) -> Optional[_TORCH_NN_MODULE]:
         """bool: whether has a cameras encoder"""
         return hasattr(self, "camera_encoder") and self.camera_encoder
+    
+    @property
+    def with_bev_encoder(self) -> Optional[_TORCH_NN_MODULE]:
+        """bool: whether has a bev encoder"""
+        return hasattr(self, "bev_encoder") and self.bev_encoder
 
     @property
     def with_radar_encoder(self) -> Optional[_TORCH_NN_MODULE]:

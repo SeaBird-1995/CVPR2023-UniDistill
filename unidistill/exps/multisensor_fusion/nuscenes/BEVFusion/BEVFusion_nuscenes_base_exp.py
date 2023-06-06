@@ -70,7 +70,8 @@ class LidarEncoder(BaseEncoder):
         )
 
     def build_map_to_bev(self):
-        return HeightCompression(num_bev_features=self.cfg.map_to_bev_num_features)
+        return HeightCompression(num_bev_features=self.cfg.map_to_bev_num_features,
+                                 collapse_z=self.cfg.collapse_z)
 
     def forward(self, lidar_points: List[torch.tensor]) -> torch.tensor:
         voxels, voxel_coords, voxel_num_points = self.voxelizer(lidar_points)
@@ -214,7 +215,11 @@ class BEVFusion(BaseMultiSensorFusion):
         else:
             self.fusion_encoder = None
 
-        self.bev_encoder = self._configure_bev_encoder()
+        if self.cfg.get("bev_encoder", None):
+            self.bev_encoder = self._configure_bev_encoder()
+        else:
+            self.bev_encoder = None
+        
         self.det_head = self._configure_det_head()
         # self.transform_layer_1 = nn.Sequential(nn.Conv2d(256,256,3,1,1),nn.BatchNorm2d(256),nn.ReLU())
         # self.transform_layer_2 = nn.Sequential(nn.Conv2d(512,512,3,1,1),nn.BatchNorm2d(512),nn.ReLU())

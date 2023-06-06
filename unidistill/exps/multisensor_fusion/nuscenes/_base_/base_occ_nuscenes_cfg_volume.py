@@ -1,6 +1,14 @@
+'''
+Copyright (c) 2023 by Haiming Zhang. All Rights Reserved.
+
+Author: Haiming Zhang
+Date: 2023-06-06 11:51:01
+Email: haimingzhang@link.cuhk.edu.cn
+Description: Use the 3D volume withouth z-axis collapse
+'''
 _POINT_CLOUD_RANGE = [-40, -40, -1, 40, 40, 5.4]
-_VOXEL_SIZE = [0.05, 0.05, 0.16]
-_GRID_SIZE = [1600, 1600, 40]
+_VOXEL_SIZE = [0.05, 0.05, 0.05]
+_GRID_SIZE = [1600, 1600, 128]
 _IMG_DIM = (256, 704)
 _OUT_SIZE_FACTOR = 8
 
@@ -101,7 +109,7 @@ MODEL_CFG = dict(
         src_num_point_features=5,
         use_num_point_features=5,
         map_to_bev_num_features=256,
-        collapse_z=True
+        collapse_z=False
     ),
     camera_encoder=dict(
         x_bound=[
@@ -152,53 +160,8 @@ MODEL_CFG = dict(
         ),
         depth_net_conf=dict(in_channels=384, mid_channels=384),
     ),
-    bev_encoder=dict(
-        backbone2d_layer_nums=[5, 5],
-        backbone2d_layer_strides=[1, 2],
-        backbone2d_num_filters=[128, 256],
-        backbone2d_upsample_strides=[1, 2],
-        backbone2d_num_upsample_filters=[256, 256],
-        num_bev_features=256,  # sp conv output channel
-        backbone2d_use_scconv=False,
-    ),
     det_head=dict(
-        target_assigner=dict(
-            point_cloud_range=_POINT_CLOUD_RANGE,
-            voxel_size=_VOXEL_SIZE,
-            grid_size=_GRID_SIZE,
-            gaussian_overlap=0.1,
-            min_radius=2,
-            iou_calculator=dict(type="BboxOverlaps3D", coordinate="lidar"),
-            cls_cost=dict(type="FocalLossCost", gamma=2, alpha=0.25, weight=0.15),
-            reg_cost=dict(type="BBoxBEVL1Cost", weight=0.25),
-            iou_cost=dict(type="IoU3DCost", weight=0.25),
-        ),
-        bbox_coder=dict(
-            pc_range=_POINT_CLOUD_RANGE[0:2],
-            voxel_size=_VOXEL_SIZE[0:2],
-            out_size_factor=_OUT_SIZE_FACTOR,
-            post_center_range=[-61.2, -61.2, -10.0, 61.2, 61.2, 10.0],
-            score_threshold=0.0,
-            code_size=10,
-        ),
-        dataset_name="nuScenes",
-        num_proposals=200,
-        hidden_channel=128,
-        in_channels=512,
-        num_classes=len(CLASS_NAMES),
-        num_decoder_layers=1,
-        num_heads=8,
-        nms_kernel_size=3,
-        out_size_factor=_OUT_SIZE_FACTOR,
-        common_heads=dict(
-            center=(2, 2), height=(1, 2), dim=(3, 2), rot=(2, 2), vel=(2, 2)
-        ),
-        code_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.2, 0.2],
-    ),
-)
-
-CENTERPOINT_DET_HEAD_CFG = dict(
-    in_channels=32,
-    out_channels=32,
-    num_classes=18
+        in_channels=128,
+        out_channels=32,
+        num_classes=18)
 )

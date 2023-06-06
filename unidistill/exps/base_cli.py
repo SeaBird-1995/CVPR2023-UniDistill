@@ -39,7 +39,7 @@ def run_cli(
     parser = BaseExp.add_argparse_args(parent_parser)
     parser.set_defaults(
         check_val_every_n_epoch=5,
-        num_sanity_val_steps=0,
+        num_sanity_val_steps=2,
         gradient_clip_val=0.1,
         strategy="ddp",
     )

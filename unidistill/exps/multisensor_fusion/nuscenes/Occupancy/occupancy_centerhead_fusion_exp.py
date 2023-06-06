@@ -12,7 +12,6 @@ from functools import partial
 
 from unidistill.exps.base_cli import run_cli
 from unidistill.exps.multisensor_fusion.nuscenes._base_.base_occ_nuscenes_cfg import (
-    CENTERPOINT_DET_HEAD_CFG,
     DATA_CFG,
     MODEL_CFG
 )
@@ -80,7 +79,8 @@ class OccupancyHead(nn.Module):
             )
 
     def forward(self, x: Tensor, gt_voxel_semantics: Tensor = None) -> Any:
-        x = rearrange(x, 'b (C Dim16) DimH DimW -> b C Dim16 DimH DimW', Dim16=16)
+        if x.ndim != 5:
+            x = rearrange(x, 'b (C Dim16) DimH DimW -> b C Dim16 DimH DimW', Dim16=16)
         occ_pred = self.final_conv(x).permute(0, 4, 3, 2, 1)
         # bncdhw->bnwhdc
         occ_pred = self.predicter(occ_pred)
@@ -110,15 +110,13 @@ class OccupancyBEVFusionCenterHead(BEVFusion):
     def __init__(self, model_cfg) -> Any:
         super().__init__(model_cfg)
 
-    def forward(
-        self,
-        lidar_points,
-        cameras_imgs,
-        metas,
-        gt_boxes,
-        return_feature=False,
-        **kwargs
-    ):
+    def extract_feat(self, 
+                     lidar_points,
+                     cameras_imgs,
+                     metas,
+                     gt_boxes,
+                     return_feature=False,
+                     **kwargs):
         if self.with_lidar_encoder:
             lidar_output = self.lidar_encoder(lidar_points)
             model_output = lidar_output
@@ -128,11 +126,26 @@ class OccupancyBEVFusionCenterHead(BEVFusion):
         if self.with_fusion_encoder:
             multimodal_output = self.fusion_encoder(lidar_output, camera_output)
             model_output = multimodal_output
-        x = self.bev_encoder(model_output)
-
-        occ_pred = self.det_head(x[0], gt_boxes)
-        if return_feature == True:
-            return model_output, x[0], forward_ret_dict["multi_head_features"]
+        
+        if self.with_bev_encoder:
+            x = self.bev_encoder(model_output)
+            return x[0]
+        else:
+            return model_output
+        
+    def forward(
+        self,
+        lidar_points,
+        cameras_imgs,
+        metas,
+        gt_boxes,
+        return_feature=False,
+        **kwargs
+    ):
+        
+        x = self.extract_feat(lidar_points, cameras_imgs, metas, gt_boxes, 
+                              return_feature, **kwargs)
+        occ_pred = self.det_head(x, gt_boxes)
         if self.training:
             voxel_semantics = kwargs['voxel_semantics']
             mask_lidar = kwargs['mask_lidar']
@@ -179,7 +192,6 @@ class Exp(BaseExp):
             self.model_cfg["camera_encoder"]["img_neck_conf"] = _IMG_NECK_CONF
             self.model_cfg["camera_encoder"]["depth_net_conf"] = _DEPTH_NET_CONF
         
-        self.model_cfg["det_head"] = CENTERPOINT_DET_HEAD_CFG
         self._change_cfg_params()
 
         self.model = self._configure_model()
