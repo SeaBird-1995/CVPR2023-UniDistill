@@ -11,7 +11,7 @@ from unidistill.exps.base_cli import run_cli
 from unidistill.exps.multisensor_fusion.nuscenes.Occupancy.occupancy_centerhead_fusion_exp import (
     Exp as BaseExp,
 )
-from unidistill.exps.multisensor_fusion.nuscenes._base_.base_occ_nuscenes_cfg_volume import (
+from unidistill.exps.multisensor_fusion.nuscenes._base_.base_occ_nuscenes_cfg import (
     MODEL_CFG,
     DATA_CFG
 )
